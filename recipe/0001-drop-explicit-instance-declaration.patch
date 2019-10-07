@@ -1,0 +1,28 @@
+From 48c72e41883844cd4c45fa1f5e207849aee1bb6e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Julian=20R=C3=BCth?= <julian.rueth@fsfe.org>
+Date: Mon, 7 Oct 2019 11:16:45 +0200
+Subject: [PATCH] drop explicit instance declaration
+
+produced a compiler error with clang 9 and I do not understand why they
+should be needed
+---
+ src/DeclareConverters.h | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/src/DeclareConverters.h b/src/DeclareConverters.h
+index 0b6e7bf..2b49558 100644
+--- a/src/DeclareConverters.h
++++ b/src/DeclareConverters.h
+@@ -218,9 +218,6 @@ public:
+     virtual bool ToMemory(PyObject* value, void* address);
+ };
+ 
+-extern template class InstancePtrPtrConverter<true>;
+-extern template class InstancePtrPtrConverter<false>;
+-
+ class InstanceArrayConverter : public InstancePtrConverter {
+ public:
+     InstanceArrayConverter(Cppyy::TCppType_t klass, dims_t dims, bool keepControl = false) :
+-- 
+2.23.0
+
