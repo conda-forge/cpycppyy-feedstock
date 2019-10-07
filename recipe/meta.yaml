@@ -1,5 +1,5 @@
 {% set name = "CPyCppyy" %}
-{% set version = "1.9.3" %}
+{% set version = "1.9.4" %}
 
 package:
   name: {{ name | lower }}
@@ -7,7 +7,9 @@ package:
 
 source:
   url: https://pypi.io/packages/source/c/cpycppyy/CPyCppyy-{{ version }}.tar.gz
-  sha256: 504fbe1b03ea276140f71db7f952fbf1ae3a3cd4335afd4ebfd2b2e63852162f
+  sha256: 8d31300c33a1a61885d2397cee96e5f0c9ba6cb1afb06f5fcf45d0d629a59d03
+  patches:
+    - 0001-drop-explicit-instance-declaration.patch
 
 build:
   number: 0
