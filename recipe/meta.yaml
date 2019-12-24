@@ -1,5 +1,5 @@
 {% set name = "CPyCppyy" %}
-{% set version = "1.9.7" %}
+{% set version = "1.10.0" %}
 
 package:
   name: {{ name | lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/c/cpycppyy/CPyCppyy-{{ version }}.tar.gz
-  sha256: b54e672a216ca8377874d6663c9f04220dee8c0f327f6c8aaa83f9507154e33e
+  sha256: e3e8d07dfaffe73d2ca759e5f070685855f9ef17ce99c740f67bb04c24f4f937
 
 build:
   number: 0
