@@ -1,5 +1,5 @@
 {% set name = "CPyCppyy" %}
-{% set version = "1.10.1" %}
+{% set version = "1.10.2" %}
 
 package:
   name: {{ name | lower }}
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://pypi.io/packages/source/c/cpycppyy/CPyCppyy-{{ version }}.tar.gz
-  sha256: fdf43a35939672a1b42b30a1c48ac1ba4fef7372233e7d169dbf4e5ee26346a4
+  sha256: c43d9586cc5d4713b3248bd9ccc253490c6615a475ef9d7c8031ea1bd200c769
 
 build:
   number: 0
-  skip: True  # [win]
-  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+  skip: true  # [win]
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
 
 requirements:
   build:
@@ -37,7 +37,7 @@ about:
   license: BSD-3-Clause
   license_family: BSD
   license_file: LICENSE.txt
-  summary: 'CPython-C++ bindings interface based on Cling/LLVM'
+  summary: CPython-C++ bindings interface based on Cling/LLVM
   description: |
     A CPython extension module to access Cling through cppyy-backend.
   doc_url: http://cppyy.readthedocs.io/
