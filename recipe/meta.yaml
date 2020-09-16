@@ -20,10 +20,10 @@ requirements:
   host:
     - python
     - pip
-    - cppyy-backend 1.12.*
+    - cppyy-backend 1.13.*
   run:
     - python
-    - cppyy-backend 1.12.*
+    - cppyy-backend 1.13.*
 
 test:
   commands:
