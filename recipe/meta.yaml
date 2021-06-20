@@ -10,8 +10,10 @@ source:
   sha256: e68c52f6078b8f8a19a307ef4bd6b602ada5ae82b23967f6c7f7da59dc7ecefa
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win or python_impl != "cpython"]
+  # cppyy-cling is not cross-compiled for pypy yet
+  skip: true  # [build_platform != target_platform and python_impl == "pypy"]
   script: {{ PYTHON }} -m pip install . --no-deps -vv
 
 requirements:
