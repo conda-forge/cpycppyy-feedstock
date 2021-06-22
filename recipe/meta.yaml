@@ -8,6 +8,8 @@ package:
 source:
   url: https://pypi.io/packages/source/c/cpycppyy/CPyCppyy-{{ version }}.tar.gz
   sha256: e68c52f6078b8f8a19a307ef4bd6b602ada5ae82b23967f6c7f7da59dc7ecefa
+  patches:
+    - cflags.patch  # [build_platform != target_platform]
 
 build:
   number: 1
