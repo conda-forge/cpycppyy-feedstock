@@ -12,7 +12,7 @@ source:
     - cflags.patch  # [build_platform != target_platform]
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win or python_impl != "cpython"]
   script: {{ PYTHON }} -m pip install . --no-deps -vv
 
