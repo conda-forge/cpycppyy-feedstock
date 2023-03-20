@@ -1,11 +1,11 @@
-About cpycppyy
-==============
+About cpycppyy-feedstock
+========================
+
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cpycppyy-feedstock/blob/main/LICENSE.txt)
 
 Home: https://pypi.org/project/CPyCppyy/
 
 Package license: BSD-3-Clause
-
-Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cpycppyy-feedstock/blob/main/LICENSE.txt)
 
 Summary: CPython-C++ bindings interface based on Cling/LLVM
 
