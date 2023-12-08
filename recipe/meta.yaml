@@ -1,5 +1,5 @@
 {% set name = "CPyCppyy" %}
-{% set version = "1.12.13" %}
+{% set version = "1.12.16" %}
 
 package:
   name: {{ name | lower }}
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://pypi.io/packages/source/c/cpycppyy/CPyCppyy-{{ version }}.tar.gz
-  sha256: f8c8c05b1eb8f0ccaed07b5069efabecff791bbe5e1b5be86767d32974e833d4
+  sha256: 09a845652ac1a82777ec499dda862f54493c1560e9df4cadecda09ecde9e4202
   patches:
     - cflags.patch  # [build_platform != target_platform]
 
 build:
-  number: 1
+  number: 0
   skip: true  # [win or python_impl != "cpython"]
   script: {{ PYTHON }} -m pip install . --no-deps -vv
 
@@ -25,15 +25,15 @@ requirements:
     - python
     - pip
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-backend ==1.14.11
+    - cppyy-backend ==1.15.2
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-cling ==6.28.0
+    - cppyy-cling ==6.30.0
   run:
     - python
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-backend ==1.14.11
+    - cppyy-backend ==1.15.2
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-cling ==6.28.0
+    - cppyy-cling ==6.30.0
 
 test:
   commands:
