@@ -52,7 +52,7 @@ about:
   description: |
     A CPython extension module to access Cling through cppyy-backend.
   doc_url: http://cppyy.readthedocs.io/
-  dev_url: https://bitbucket.org/wlav/cpycppyy/src
+  dev_url: https://github.com/wlav/CPyCppyy
 
 extra:
   recipe-maintainers:
