@@ -25,6 +25,7 @@ requirements:
   host:
     - python
     - pip
+    - setuptools
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
     - cppyy-backend ==1.15.2
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
