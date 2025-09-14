@@ -1,5 +1,5 @@
 {% set name = "CPyCppyy" %}
-{% set version = "1.12.16" %}
+{% set version = "1.13.0" %}
 
 package:
   name: {{ name | lower }}
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://pypi.org/packages/source/c/cpycppyy/CPyCppyy-{{ version }}.tar.gz
-  sha256: 09a845652ac1a82777ec499dda862f54493c1560e9df4cadecda09ecde9e4202
+  sha256: 783b2a8e6addbfb21fd4f49c3b61cca887e692d0a59073ab6c0130f365ca3b9c
   patches:
     - cflags.patch  # [build_platform != target_platform]
 
 build:
-  number: 2
+  number: 0
   skip: true  # [win or python_impl != "cpython"]
   script: {{ PYTHON }} -m pip install . --no-deps -vv
 
