@@ -42,7 +42,7 @@ requirements:
 
 tests:
   - script:
-      - ls $SP_DIR/libcppyy*.so
+      - ls `python -c "import site; [print(p) for p in site.getsitepackages()]"`/libcppyy*.so
 
 about:
   license: BSD-3-Clause
