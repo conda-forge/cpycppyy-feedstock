@@ -43,6 +43,9 @@ requirements:
 tests:
   - script:
       - ls `python -c "import site; [print(p) for p in site.getsitepackages()]"`/libcppyy*.so
+      # Ensure that API.h was installed into CPyCppyy and not cpycppyy, see https://github.com/wlav/cppyy/issues/292
+      - test -f $PREFIX/include/python*/CPyCppyy/API.h
+
 
 about:
   license: BSD-3-Clause
