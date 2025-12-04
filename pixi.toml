@@ -5,7 +5,7 @@
 
 [workspace]
 name = "cpycppyy-feedstock"
-version = "3.53.2"  # conda-smithy version used to generate this file
+version = "3.53.3"  # conda-smithy version used to generate this file
 description = "Pixi configuration for conda-forge/cpycppyy-feedstock"
 authors = ["@conda-forge/cpycppyy"]
 channels = ["conda-forge"]
