@@ -1,21 +1,20 @@
 schema_version: 1
 
 context:
-  name: CPyCppyy
-  version: 1.12.16
+  version: 1.13.0
 
 package:
-  name: ${{ name | lower }}
+  name: cpycppyy
   version: ${{ version }}
 
 source:
   url: https://pypi.org/packages/source/c/cpycppyy/CPyCppyy-${{ version }}.tar.gz
-  sha256: 09a845652ac1a82777ec499dda862f54493c1560e9df4cadecda09ecde9e4202
+  sha256: 783b2a8e6addbfb21fd4f49c3b61cca887e692d0a59073ab6c0130f365ca3b9c
   patches:
     - 0001-use-host-but-not-build-cflags.patch
 
 build:
-  number: 4
+  number: 0
   skip: win
   script: ${{ PYTHON }} -m pip install . --no-deps -vv
 
@@ -32,15 +31,15 @@ requirements:
     - pip
     - setuptools
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-backend ==1.15.2
+    - cppyy-backend ==1.15.3
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-cling ==6.30.0
+    - cppyy-cling ==6.32.8
   run:
     - python
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-backend ==1.15.2
+    - cppyy-backend ==1.15.3
     # cppyy-cling, cppyy-backend, cpycppyy and cppyy are essentially a single package, so we always pin exactly between these.
-    - cppyy-cling ==6.30.0
+    - cppyy-cling ==6.32.8
 
 tests:
   - script:
@@ -56,7 +55,7 @@ about:
   description: |
     A CPython extension module to access Cling through cppyy-backend.
   homepage: https://pypi.org/project/CPyCppyy/
-  repository: https://bitbucket.org/wlav/cpycppyy/src
+  repository: https://github.com/wlav/CPyCppyy
   documentation: http://cppyy.readthedocs.io/
 
 extra:
