@@ -14,7 +14,7 @@ source:
     - 0001-use-host-but-not-build-cflags.patch
 
 build:
-  number: 0
+  number: 1
   skip: win
   script: ${{ PYTHON }} -m pip install . --no-deps -vv
 
