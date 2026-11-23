@@ -1,0 +1,136 @@
+Subject: [PATCH] Support free-threaded (Py_GIL_DISABLED) CPython builds
+
+Use Py_REFCNT() instead of reading ob_refcnt, initialize static object
+headers with the portable PyObject_HEAD_INIT() (which makes them immortal
+on 3.12+, like CPython's own singletons), and handle the split
+ob_ref_local/ob_ref_shared refcount fields when temporarily zeroing the
+refcount around PyObject_ClearWeakRefs.
+
+---
+diff -ru a/src/API.cxx b/src/API.cxx
+--- a/src/API.cxx	2024-11-05 19:18:05.000000000 +0000
++++ b/src/API.cxx	2026-11-23 10:03:57.783864459 +0000
+@@ -226,7 +226,7 @@
+ 
+ // the instance fails the lively test if it owns the C++ object while having a
+ // reference count of 1 (meaning: it could delete the C++ instance any moment)
+-    if (pyobject->ob_refcnt <= 1 && (((CPPInstance*)pyobject)->fFlags & CPPInstance::kIsOwner))
++    if (Py_REFCNT(pyobject) <= 1 && (((CPPInstance*)pyobject)->fFlags & CPPInstance::kIsOwner))
+         return false;
+ 
+     return true;
+diff -ru a/src/CPPOverload.h b/src/CPPOverload.h
+--- a/src/CPPOverload.h	2023-07-24 21:26:35.000000000 +0000
++++ b/src/CPPOverload.h	2026-11-23 10:03:57.784001637 +0000
+@@ -25,7 +25,7 @@
+     // improved overloads for implicit conversions
+         PyObject* pyobj = CPyCppyy_PyArgs_GET_ITEM(args, i);
+         hash += (uint64_t)Py_TYPE(pyobj);
+-        hash += (uint64_t)(pyobj->ob_refcnt == 1 ? 1 : 0);
++        hash += (uint64_t)(Py_REFCNT(pyobj) == 1 ? 1 : 0);
+         hash += (hash << 10); hash ^= (hash >> 6);
+     }
+ 
+diff -ru a/src/CPyCppyyModule.cxx b/src/CPyCppyyModule.cxx
+--- a/src/CPyCppyyModule.cxx	2024-11-08 18:11:12.000000000 +0000
++++ b/src/CPyCppyyModule.cxx	2026-11-23 10:04:17.717736913 +0000
+@@ -214,23 +214,13 @@
+ 
+ namespace {
+ 
+-PyObject _CPyCppyy_NullPtrStruct = {_PyObject_EXTRA_INIT
+-// In 3.12.0-beta this field was changed from a ssize_t to a union
+-#if PY_VERSION_HEX >= 0x30c00b1
+-                                    {1},
+-#else
+-                                    1,
+-#endif
+-                                    &PyNullPtr_t_Type};
++// PyObject_HEAD_INIT ends in a comma (it is meant for use inside a type
++// initializer), so wrap it in a 1-element array
++PyObject _CPyCppyy_NullPtrStructArr[1] = {PyObject_HEAD_INIT(&PyNullPtr_t_Type)};
++PyObject& _CPyCppyy_NullPtrStruct = _CPyCppyy_NullPtrStructArr[0];
+ 
+-PyObject _CPyCppyy_DefaultStruct = {_PyObject_EXTRA_INIT
+-// In 3.12.0-beta this field was changed from a ssize_t to a union
+-#if PY_VERSION_HEX >= 0x30c00b1
+-                                    {1},
+-#else
+-                                    1,
+-#endif
+-                                    &PyDefault_t_Type};
++PyObject _CPyCppyy_DefaultStructArr[1] = {PyObject_HEAD_INIT(&PyDefault_t_Type)};
++PyObject& _CPyCppyy_DefaultStruct = _CPyCppyy_DefaultStructArr[0];
+ 
+ // TODO: refactor with Converters.cxx
+ struct CPyCppyy_tagCDataObject {       // non-public (but stable)
+diff -ru a/src/Converters.cxx b/src/Converters.cxx
+--- a/src/Converters.cxx	2024-12-13 17:43:26.000000000 +0000
++++ b/src/Converters.cxx	2026-11-23 10:03:57.784338418 +0000
+@@ -2069,7 +2069,7 @@
+         if (pyobj->fFlags & CPPInstance::kIsRValue) {
+             pyobj->fFlags &= ~CPPInstance::kIsRValue;
+             moveit_reason = 2;
+-        } else if (pyobject->ob_refcnt <= MOVE_REFCOUNT_CUTOFF) {
++        } else if (Py_REFCNT(pyobject) <= MOVE_REFCOUNT_CUTOFF) {
+             moveit_reason = 1;
+         } else
+             moveit_reason = 0;
+@@ -2302,7 +2302,7 @@
+     if (pyobj->fFlags & CPPInstance::kIsRValue) {
+         pyobj->fFlags &= ~CPPInstance::kIsRValue;
+         moveit_reason = 2;
+-    } else if (pyobject->ob_refcnt <= MOVE_REFCOUNT_CUTOFF) {
++    } else if (Py_REFCNT(pyobject) <= MOVE_REFCOUNT_CUTOFF) {
+         moveit_reason = 1;
+     }
+ 
+diff -ru a/src/MemoryRegulator.cxx b/src/MemoryRegulator.cxx
+--- a/src/MemoryRegulator.cxx	2024-12-13 17:43:26.000000000 +0000
++++ b/src/MemoryRegulator.cxx	2026-11-23 10:04:11.853114962 +0000
+@@ -40,8 +40,9 @@
+     // create a CPyCppyy NoneType (for references that went dodo) from NoneType
+         memset(&CPyCppyy_NoneType, 0, sizeof(CPyCppyy_NoneType));
+ 
+-        ((PyObject&)CPyCppyy_NoneType).ob_type    = &PyType_Type;
+-        ((PyObject&)CPyCppyy_NoneType).ob_refcnt  = 1;
++    // use the standard static-object header (portable across GIL and free-threaded builds)
++        PyObject head[1] = {PyObject_HEAD_INIT(&PyType_Type)};
++        memcpy(&CPyCppyy_NoneType, head, sizeof(head));
+         ((PyVarObject&)CPyCppyy_NoneType).ob_size = 0;
+ 
+         CPyCppyy_NoneType.tp_name        = const_cast<char*>("CPyCppyy_NoneType");
+@@ -147,10 +148,21 @@
+         }
+ 
+     // notify any other weak referents by playing dead
++#ifdef Py_GIL_DISABLED
++        PyObject* pyo = (PyObject*)pyobj;
++        uint32_t ref_local = pyo->ob_ref_local;
++        Py_ssize_t ref_shared = pyo->ob_ref_shared;
++        pyo->ob_ref_local = 0;
++        pyo->ob_ref_shared = 0;
++        PyObject_ClearWeakRefs(pyo);
++        pyo->ob_ref_local = ref_local;
++        pyo->ob_ref_shared = ref_shared;
++#else
+         Py_ssize_t refcnt = ((PyObject*)pyobj)->ob_refcnt;
+         ((PyObject*)pyobj)->ob_refcnt = 0;
+         PyObject_ClearWeakRefs((PyObject*)pyobj);
+         ((PyObject*)pyobj)->ob_refcnt = refcnt;
++#endif
+ 
+     // cleanup object internals
+         pyobj->CppOwns();              // held object is out of scope now anyway
+diff -ru a/src/Pythonize.cxx b/src/Pythonize.cxx
+--- a/src/Pythonize.cxx	2024-12-13 18:16:25.000000000 +0000
++++ b/src/Pythonize.cxx	2026-11-23 10:03:57.784597804 +0000
+@@ -549,7 +549,7 @@
+ 
+ // tell the iterator code to set a life line if this container is a temporary
+     vi->vi_flags = vectoriterobject::kDefault;
+-    if (v->ob_refcnt <= 2 || (((CPPInstance*)v)->fFlags & CPPInstance::kIsValue))
++    if (Py_REFCNT(v) <= 2 || (((CPPInstance*)v)->fFlags & CPPInstance::kIsValue))
+         vi->vi_flags = vectoriterobject::kNeedLifeLine;
+ 
+     PyObject* pyvalue_type = PyObject_GetAttr((PyObject*)Py_TYPE(v), PyStrings::gValueType);
