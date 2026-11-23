@@ -12,9 +12,10 @@ source:
   sha256: 783b2a8e6addbfb21fd4f49c3b61cca887e692d0a59073ab6c0130f365ca3b9c
   patches:
     - 0001-use-host-but-not-build-cflags.patch
+    - 0002-support-free-threaded-python.patch
 
 build:
-  number: 2
+  number: 3
   skip: win
   script: ${{ PYTHON }} -m pip install . --no-deps -vv
 
